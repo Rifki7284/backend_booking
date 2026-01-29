@@ -23,7 +23,7 @@ func NewPropertiesApi(app *fiber.App, propertiesService domain.PropertiesService
 	Owner := app.Group(
 		"/properties",
 		middleware,
-		middlewares.RoleMiddleware("Client"),
+		middlewares.RoleMiddleware("Owner"),
 	)
 	Owner.Get("/", pa.Index)
 	Owner.Get("/detail/:id", pa.Show)
