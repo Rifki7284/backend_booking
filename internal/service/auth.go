@@ -40,10 +40,11 @@ func (a authService) Register(ctx context.Context, req dto.RegisterRequest) (dto
 		return dto.RegisterRequest{}, err
 	}
 	return dto.RegisterRequest{
-		Name:  createdUser.Name,
-		Email: createdUser.Email,
-		Phone: createdUser.Phone,
-		Role:  createdUser.Role,
+		Name:     createdUser.Name,
+		Email:    createdUser.Email,
+		Phone:    createdUser.Phone,
+		Role:     createdUser.Role,
+		Password: string(hashedPassword),
 	}, nil
 }
 
@@ -65,15 +66,23 @@ func (a authService) Login(ctx context.Context, req dto.AuthRequest) (dto.AuthRe
 	if err != nil {
 		return dto.AuthResponse{}, errors.New("Authentication failed: invalid credentials")
 	}
+	expHour := a.conf.JWT.Exp
+	if expHour == 0 {
+		expHour = 24 // Default 24 jam
+	}
+
+	expirationTime := time.Now().Add(time.Duration(expHour) * time.Hour)
 	claim := jwt.MapClaims{
-		"id":  user.ID,
-		"exp": time.Now().Add(time.Duration(a.conf.JWT.Exp) * time.Hour).Unix(),
+		"id":   user.ID,
+		"role": user.Role,
+		"exp":  expirationTime.Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokenStr, err := token.SignedString([]byte(a.conf.JWT.Key))
 	if err != nil {
-		return dto.AuthResponse{}, errors.New("Authentication failed: invalid credentials")
+		return dto.AuthResponse{}, errors.New("test")
 	}
+
 	return dto.AuthResponse{
 		Token: tokenStr,
 	}, nil

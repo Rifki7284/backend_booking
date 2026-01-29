@@ -17,23 +17,6 @@ func NewBooking(db *gorm.DB) domain.BookingRepository {
 	}
 }
 
-func (b *bookingRepository) Create(
-	ctx context.Context,
-	id string,
-) (domain.Booking, error) {
-
-	booking := domain.Booking{
-		ID: id,
-	}
-
-	err := b.db.
-		WithContext(ctx).
-		Create(&booking).
-		Error
-
-	return booking, err
-}
-
 func (b *bookingRepository) Delete(ctx context.Context, id string) error {
 	return b.db.
 		WithContext(ctx).
@@ -57,7 +40,7 @@ func (b *bookingRepository) FindAll(
 	return result, err
 }
 
-func (b *bookingRepository) Save(
+func (b *bookingRepository) Create(
 	ctx context.Context,
 	c *domain.Booking,
 ) error {

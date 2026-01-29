@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"shellrean.id/back-end/domain"
 	"shellrean.id/back-end/dto"
+	"shellrean.id/back-end/internal/middlewares"
 	"shellrean.id/back-end/internal/util"
 )
 
@@ -19,11 +20,17 @@ func NewBookingApi(app *fiber.App, bookingService domain.BookingService, middlew
 	ba := bookingApi{
 		bookingService: bookingService,
 	}
-	app.Get("/booking", middleware, ba.Index)
-	app.Get("/booking/detail/:id", middleware, ba.Show)
-	app.Post("/booking/create", middleware, ba.Create)
-	app.Put("/booking/:id", middleware, ba.Update)
-	app.Delete("/booking/:id", middleware, ba.Delete)
+	client := app.Group(
+		"/booking",
+		middleware,
+		middlewares.RoleMiddleware("Client"),
+	)
+
+	client.Get("/", ba.Index)
+	client.Get("/detail/:id", ba.Show)
+	client.Post("/create", ba.Create)
+	client.Put("/:id", ba.Update)
+	client.Delete("/:id", ba.Delete)
 }
 func (ba bookingApi) Index(ctx *fiber.Ctx) error {
 	b, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
