@@ -23,11 +23,12 @@ func NewRoomApi(app *fiber.App, roomService domain.RoomService, middleware fiber
 	client := app.Group(
 		"/rooms",
 		middleware,
-		middlewares.RoleMiddleware("Owner"),
+		middlewares.RoleMiddleware("Client"),
 	)
 
 	client.Get("/", ra.Index)
 	client.Post("/create", ra.Create)
+	client.Put("/:id", ra.Update)
 }
 func (ra roomApi) Index(ctx *fiber.Ctx) error {
 	r, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
@@ -50,6 +51,24 @@ func (ra roomApi) Create(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusBadRequest).JSON(dto.CreateResponseErrorData("validation error", fails))
 	}
 	err := ra.roomService.Create(r, req)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(dto.CreateResponseError(err.Error()))
+	}
+	return ctx.Status(http.StatusCreated).JSON(dto.CreateResponseSuccess(""))
+}
+func (ra roomApi) Update(ctx *fiber.Ctx) error {
+	r, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
+	defer cancel()
+	var req dto.UpdateRoomRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.SendStatus(http.StatusUnprocessableEntity)
+	}
+	fails := util.Validate(req)
+	if len(fails) > 0 {
+		return ctx.Status(http.StatusBadRequest).JSON(dto.CreateResponseErrorData("validation error", fails))
+	}
+	req.ID = ctx.Params("id")
+	err := ra.roomService.Update(r, req)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(dto.CreateResponseError(err.Error()))
 	}

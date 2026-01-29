@@ -22,10 +22,13 @@ type Room struct {
 
 type RoomRepository interface {
 	FindAll(ctx context.Context) ([]Room, error)
+	FindById(ctx context.Context, id string) (Room, error)
 	Create(ctx context.Context, c *Room) error
 	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, c *Room) error
 }
 type RoomService interface {
 	Index(ctx context.Context) ([]dto.RoomData, error)
 	Create(ctx context.Context, req dto.CreateRoomRequest) error
+	Update(ctx context.Context, req dto.UpdateRoomRequest) error
 }

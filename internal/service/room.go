@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"shellrean.id/back-end/domain"
@@ -45,4 +46,19 @@ func (r roomService) Create(ctx context.Context, req dto.CreateRoomRequest) erro
 		PropertyID:    req.PropertyID,
 	}
 	return r.roomRepository.Create(ctx, &room)
+}
+func (r *roomService) Update(ctx context.Context, req dto.UpdateRoomRequest) error {
+	persisted, err := r.roomRepository.FindById(ctx, req.ID)
+	if err != nil {
+		return err
+	}
+	if persisted.ID == "" {
+		return errors.New("Room not found")
+	}
+	persisted.Capacity = req.Capacity
+	persisted.Name = req.Name
+	persisted.PropertyID = req.PropertyID
+	persisted.PricePerNight = req.PricePerNight
+	persisted.Description = req.Description
+	return r.roomRepository.Update(ctx, &persisted)
 }

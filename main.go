@@ -37,6 +37,8 @@ func main() {
 	userService := service.NewAuthService(cnf, userRepository)
 	roomRepository := repository.NewRoom(db)
 	roomService := service.NewRoomService(roomRepository)
+	propertiesRepository := repository.NewProperties(db)
+	propertiesService := service.NewPropertiesService(propertiesRepository)
 	app := fiber.New()
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("Hello, World!")
@@ -46,6 +48,7 @@ func main() {
 	api.NewBookingApi(app, bookingService, jwtMidd)
 	api.NewAuthApi(app, userService)
 	api.NewRoomApi(app, roomService, jwtMidd)
+	api.NewPropertiesApi(app, propertiesService, jwtMidd)
 	err := app.Listen(cnf.Server.Host + ":" + cnf.Server.Port)
 	if err != nil {
 		panic(err)

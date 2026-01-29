@@ -31,11 +31,35 @@ func (r *roomRepository) Create(
 		Create(c).
 		Error
 }
+func (r *roomRepository) FindById(
+	ctx context.Context,
+	id string,
+) (domain.Room, error) {
+	var room domain.Room
+	err := r.db.
+		WithContext(ctx).
+		Where("id = ? AND deleted_at IS NULL", id).
+		First(&room).
+		Error
+
+	return room, err
+}
 
 func (r *roomRepository) Delete(ctx context.Context, id string) error {
 	return r.db.
 		WithContext(ctx).
 		Where("id = ?", id).
 		Delete(&domain.Room{}).
+		Error
+}
+func (r *roomRepository) Update(
+	ctx context.Context,
+	c *domain.Room,
+) error {
+	return r.db.
+		WithContext(ctx).
+		Model(&domain.Room{}).
+		Where("id = ?", c.ID).
+		Updates(c).
 		Error
 }
