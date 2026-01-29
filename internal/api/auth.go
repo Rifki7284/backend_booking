@@ -19,6 +19,7 @@ func NewAuthApi(app *fiber.App, authService domain.AuthService) *AuthApi {
 		authService: authService,
 	}
 	app.Post("/login", aa.Login)
+	app.Post("/register", aa.Register)
 	return aa
 }
 func (aa *AuthApi) Login(ctx *fiber.Ctx) error {
@@ -29,6 +30,19 @@ func (aa *AuthApi) Login(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusUnprocessableEntity)
 	}
 	res, err := aa.authService.Login(c, req)
+	if err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(dto.CreateResponseError(err.Error()))
+	}
+	return ctx.Status(http.StatusOK).JSON(dto.CreateResponseSuccess(res))
+}
+func (aa *AuthApi) Register(ctx *fiber.Ctx) error {
+	c, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
+	defer cancel()
+	var req dto.RegisterRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.SendStatus(fiber.StatusUnprocessableEntity)
+	}
+	res, err := aa.authService.Register(c, req)
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(dto.CreateResponseError(err.Error()))
 	}

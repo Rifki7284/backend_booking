@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"shellrean.id/back-end/domain"
@@ -50,7 +48,6 @@ func (b *bookingService) Create(ctx context.Context, req dto.CreateBookingReques
 		EndTime:     req.EndTime,
 		Status:      req.Status,
 		Notes:       req.Notes,
-		CreatedAt:   sql.NullTime{Valid: true, Time: time.Now()},
 	}
 	return b.bookingRepository.Save(ctx, &booking)
 }
@@ -65,7 +62,6 @@ func (b *bookingService) Update(ctx context.Context, req dto.UpdateBookingReques
 	}
 	persisted.Notes = req.Notes
 	persisted.Status = req.Status
-	persisted.UpdatedAt = sql.NullTime{Valid: true, Time: time.Now()}
 	return b.bookingRepository.Update(ctx, &persisted)
 }
 func (b *bookingService) Delete(ctx context.Context, id string) error {

@@ -2,22 +2,23 @@ package domain
 
 import (
 	"context"
-	"database/sql"
+	"time"
 
+	"gorm.io/gorm"
 	"shellrean.id/back-end/dto"
 )
 
 type Booking struct {
-	ID          string       `db:"id"`
-	UserID      string       `db:"user_id"`
-	BookingDate string       `db:"booking_date"`
-	StartTime   string       `db:"start_time"`
-	EndTime     string       `db:"end_time"`
-	Status      string       `db:"status"`
-	Notes       string       `db:"notes"`
-	CreatedAt   sql.NullTime `db:"created_at"`
-	UpdatedAt   sql.NullTime `db:"updated_at"`
-	DeletedAt   sql.NullTime `db:"deleted_at"`
+	ID          string `db:"id"`
+	UserID      string `db:"user_id"`
+	BookingDate string `db:"booking_date"`
+	StartTime   string `db:"start_time"`
+	EndTime     string `db:"end_time"`
+	Status      string `db:"status"`
+	Notes       string `db:"notes"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 type BookingRepository interface {
 	FindAll(ctx context.Context) ([]Booking, error)

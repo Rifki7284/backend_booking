@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"shellrean.id/back-end/domain"
 	"shellrean.id/back-end/dto"
@@ -15,6 +16,35 @@ import (
 type authService struct {
 	conf           *config.Config
 	userRepository domain.UserRepository
+}
+
+func (a authService) Register(ctx context.Context, req dto.RegisterRequest) (dto.RegisterRequest, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(req.Password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		return dto.RegisterRequest{}, err
+	}
+
+	user := domain.User{
+		ID:       uuid.NewString(),
+		Name:     req.Name,
+		Email:    req.Email,
+		Phone:    req.Phone,
+		Role:     "Client",
+		Password: string(hashedPassword),
+	}
+	createdUser, err := a.userRepository.Save(ctx, &user)
+	if err != nil {
+		return dto.RegisterRequest{}, err
+	}
+	return dto.RegisterRequest{
+		Name:  createdUser.Name,
+		Email: createdUser.Email,
+		Phone: createdUser.Phone,
+		Role:  createdUser.Role,
+	}, nil
 }
 
 func NewAuthService(cnf *config.Config, userRepository domain.UserRepository) domain.AuthService {

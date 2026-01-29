@@ -11,6 +11,18 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
+func (u *UserRepository) Save(
+	ctx context.Context,
+	user *domain.User,
+) (domain.User, error) {
+
+	if err := u.db.WithContext(ctx).Create(user).Error; err != nil {
+		return domain.User{}, err
+	}
+
+	return *user, nil
+}
+
 func NewUser(db *gorm.DB) *UserRepository {
 	return &UserRepository{
 		db: db,
