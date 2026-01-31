@@ -8,18 +8,16 @@ import (
 	"shellrean.id/back-end/dto"
 )
 
-// domain/properties.go
 type Properties struct {
 	ID          string `db:"id" gorm:"primaryKey"`
 	OwnerID     string `db:"owner_id"`
 	Name        string `db:"name"`
 	Address     string `db:"address"`
 	Description string `db:"description"`
-	// Tambahkan baris ini untuk relasi
-	Rooms     []Room `gorm:"foreignKey:PropertyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Rooms       []Room `gorm:"foreignKey:PropertyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 type PropertiesRepository interface {
 	FindAll(ctx context.Context) ([]Properties, error)

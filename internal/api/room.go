@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"shellrean.id/back-end/domain"
 	"shellrean.id/back-end/dto"
 	"shellrean.id/back-end/internal/middlewares"
@@ -20,15 +21,15 @@ func NewRoomApi(app *fiber.App, roomService domain.RoomService, middleware fiber
 	ra := roomApi{
 		roomService: roomService,
 	}
+	app.Get("/rooms", ra.Index)
 	Protected := app.Group(
 		"/rooms",
 		middleware,
 		middlewares.RoleMiddleware("Owner"),
 	)
-
-	app.Get("/", ra.Index)
 	Protected.Post("/create", ra.Create)
 	Protected.Put("/:id", ra.Update)
+	Protected.Delete("/:id", ra.Delete)
 }
 func (ra roomApi) Index(ctx *fiber.Ctx) error {
 	r, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
@@ -57,6 +58,8 @@ func (ra roomApi) Create(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusCreated).JSON(dto.CreateResponseSuccess(""))
 }
 func (ra roomApi) Update(ctx *fiber.Ctx) error {
+	claim := ctx.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
+	id := claim["id"].(string)
 	r, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
 	defer cancel()
 	var req dto.UpdateRoomRequest
@@ -68,9 +71,21 @@ func (ra roomApi) Update(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusBadRequest).JSON(dto.CreateResponseErrorData("validation error", fails))
 	}
 	req.ID = ctx.Params("id")
-	err := ra.roomService.Update(r, req)
+	err := ra.roomService.Update(r, req, id)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(dto.CreateResponseError(err.Error()))
 	}
 	return ctx.Status(http.StatusCreated).JSON(dto.CreateResponseSuccess(""))
+}
+func (ra roomApi) Delete(ctx *fiber.Ctx) error {
+	claim := ctx.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
+	id_owner := claim["id"].(string)
+	b, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
+	defer cancel()
+	id := ctx.Params("id")
+	err := ra.roomService.Delete(b, id, id_owner)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(dto.CreateResponseError(err.Error()))
+	}
+	return ctx.SendStatus(http.StatusNoContent)
 }

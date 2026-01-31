@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	jwtMid "github.com/gofiber/contrib/jwt"
@@ -21,10 +20,6 @@ func main() {
 			Key: []byte(cnf.JWT.Key),
 		},
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-			// LOG KE CONSOLE
-			fmt.Println("JWT ERROR =>", err)
-
-			// KIRIM KE RESPONSE (sementara, untuk debug)
 			return ctx.Status(http.StatusUnauthorized).JSON(fiber.Map{
 				"error": err.Error(),
 			})

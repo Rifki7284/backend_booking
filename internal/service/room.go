@@ -37,10 +37,8 @@ func (r roomService) Index(ctx context.Context) ([]dto.RoomData, error) {
 	return roomData, nil
 }
 func (r roomService) Create(ctx context.Context, req dto.CreateRoomRequest) error {
-	//userID, ok := util.GetUserID(ctx)
 	room := domain.Room{
-		ID: uuid.NewString(),
-		//OwnerID:       userID,
+		ID:            uuid.NewString(),
 		Name:          req.Name,
 		Capacity:      req.Capacity,
 		PricePerNight: req.PricePerNight,
@@ -49,8 +47,8 @@ func (r roomService) Create(ctx context.Context, req dto.CreateRoomRequest) erro
 	}
 	return r.roomRepository.Create(ctx, &room)
 }
-func (r *roomService) Update(ctx context.Context, req dto.UpdateRoomRequest) error {
-	persisted, err := r.roomRepository.FindById(ctx, req.ID)
+func (r *roomService) Update(ctx context.Context, req dto.UpdateRoomRequest, id string) error {
+	persisted, err := r.roomRepository.FindByIdAndOwner(ctx, req.ID, id)
 	if err != nil {
 		return err
 	}
@@ -59,8 +57,17 @@ func (r *roomService) Update(ctx context.Context, req dto.UpdateRoomRequest) err
 	}
 	persisted.Capacity = req.Capacity
 	persisted.Name = req.Name
-	persisted.PropertyID = req.PropertyID
 	persisted.PricePerNight = req.PricePerNight
 	persisted.Description = req.Description
 	return r.roomRepository.Update(ctx, &persisted)
+}
+func (r *roomService) Delete(ctx context.Context, id string, id_owner string) error {
+	exist, err := r.roomRepository.FindByIdAndOwner(ctx, id, id_owner)
+	if err != nil {
+		return err
+	}
+	if exist.ID == "" {
+		return errors.New("Room not found")
+	}
+	return r.roomRepository.Delete(ctx, id)
 }
