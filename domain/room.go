@@ -9,7 +9,8 @@ import (
 )
 
 type Room struct {
-	ID            string  `db:"id"`
+	ID            string  `db:"id" gorm:"primaryKey"`
+	OwnerID       string  `db:"owner_id"`
 	Name          string  `db:"name"`
 	PropertyID    string  `db:"property_id"`
 	Capacity      int     `db:"capacity"`
@@ -23,6 +24,7 @@ type Room struct {
 type RoomRepository interface {
 	FindAll(ctx context.Context) ([]Room, error)
 	FindById(ctx context.Context, id string) (Room, error)
+	FindByIdAndOwner(ctx context.Context, id string, id_owner string) (Room, error)
 	Create(ctx context.Context, c *Room) error
 	Delete(ctx context.Context, id string) error
 	Update(ctx context.Context, c *Room) error

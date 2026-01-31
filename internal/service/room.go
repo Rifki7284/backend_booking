@@ -37,8 +37,10 @@ func (r roomService) Index(ctx context.Context) ([]dto.RoomData, error) {
 	return roomData, nil
 }
 func (r roomService) Create(ctx context.Context, req dto.CreateRoomRequest) error {
+	//userID, ok := util.GetUserID(ctx)
 	room := domain.Room{
-		ID:            uuid.NewString(),
+		ID: uuid.NewString(),
+		//OwnerID:       userID,
 		Name:          req.Name,
 		Capacity:      req.Capacity,
 		PricePerNight: req.PricePerNight,

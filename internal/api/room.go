@@ -20,15 +20,15 @@ func NewRoomApi(app *fiber.App, roomService domain.RoomService, middleware fiber
 	ra := roomApi{
 		roomService: roomService,
 	}
-	client := app.Group(
+	Protected := app.Group(
 		"/rooms",
 		middleware,
-		middlewares.RoleMiddleware("Client"),
+		middlewares.RoleMiddleware("Owner"),
 	)
 
-	client.Get("/", ra.Index)
-	client.Post("/create", ra.Create)
-	client.Put("/:id", ra.Update)
+	app.Get("/", ra.Index)
+	Protected.Post("/create", ra.Create)
+	Protected.Put("/:id", ra.Update)
 }
 func (ra roomApi) Index(ctx *fiber.Ctx) error {
 	r, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)

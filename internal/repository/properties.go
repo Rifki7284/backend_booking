@@ -11,6 +11,27 @@ type propertiesRepository struct {
 	db *gorm.DB
 }
 
+func (p *propertiesRepository) FindByIdAndOwner(ctx context.Context, id string, id_owner string) (domain.Properties, error) {
+	var result domain.Properties
+	err := p.db.
+		Where("id = ? AND owner_id = ? AND deleted_at IS NULL", id, id_owner).
+		WithContext(ctx).
+		Find(&result).
+		Error
+	return result, err
+}
+
+func (p *propertiesRepository) FindByOwner(ctx context.Context, id string) ([]domain.Properties, error) {
+	var result []domain.Properties
+	err := p.db.
+		Preload("Rooms").
+		Where("owner_id = ? AND deleted_at IS NULL", id).
+		WithContext(ctx).
+		Find(&result).
+		Error
+	return result, err
+}
+
 func NewProperties(db *gorm.DB) domain.PropertiesRepository {
 	return &propertiesRepository{
 		db: db,
@@ -35,6 +56,7 @@ func (p *propertiesRepository) Delete(ctx context.Context, id string) error {
 func (p *propertiesRepository) FindAll(ctx context.Context) ([]domain.Properties, error) {
 	var result []domain.Properties
 	err := p.db.
+		Preload("Rooms").
 		Where("deleted_at IS NULL").
 		WithContext(ctx).
 		Find(&result).
@@ -43,13 +65,13 @@ func (p *propertiesRepository) FindAll(ctx context.Context) ([]domain.Properties
 }
 
 func (p *propertiesRepository) FindById(ctx context.Context, id string) (domain.Properties, error) {
-	var result []domain.Properties
-	err := p.db.
+	var result domain.Properties
+	err := p.db.WithContext(ctx).
+		Preload("Rooms").
 		Where("id = ? AND deleted_at IS NULL", id).
-		WithContext(ctx).
-		Find(&result).
+		First(&result).
 		Error
-	return result[0], err
+	return result, err
 }
 
 func (p *propertiesRepository) Update(ctx context.Context, c *domain.Properties) error {

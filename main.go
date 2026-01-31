@@ -40,9 +40,6 @@ func main() {
 	propertiesRepository := repository.NewProperties(db)
 	propertiesService := service.NewPropertiesService(propertiesRepository)
 	app := fiber.New()
-	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("Hello, World!")
-	})
 	_ = bookingService
 
 	api.NewBookingApi(app, bookingService, jwtMidd)

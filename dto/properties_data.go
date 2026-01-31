@@ -1,11 +1,13 @@
 package dto
 
+// dto/properties.go
 type PropertiesData struct {
-	ID          string `db:"id"`
-	OwnerID     string `db:"owner_id"`
-	Name        string `db:"name"`
-	Address     string `db:"address"`
-	Description string `db:"description"`
+	ID          string     `json:"id"`
+	OwnerID     string     `json:"owner_id"`
+	Name        string     `json:"name"`
+	Address     string     `json:"address"`
+	Description string     `json:"description"`
+	Rooms       []RoomData `json:"rooms"`
 }
 type CreatePropertiesRequest struct {
 	OwnerID     string `json:"owner_id" validate:"required,uuid4"`

@@ -11,6 +11,11 @@ type roomRepository struct {
 	db *gorm.DB
 }
 
+// FindByIdAndOwner implements [domain.RoomRepository].
+func (r *roomRepository) FindByIdAndOwner(ctx context.Context, id string, id_owner string) (domain.Room, error) {
+	panic("unimplemented")
+}
+
 func NewRoom(db *gorm.DB) *roomRepository {
 	return &roomRepository{
 		db: db,
