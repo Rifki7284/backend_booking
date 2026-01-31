@@ -32,7 +32,7 @@ func (a authService) Register(ctx context.Context, req dto.RegisterRequest) (dto
 		Name:     req.Name,
 		Email:    req.Email,
 		Phone:    req.Phone,
-		Role:     "Client",
+		Role:     req.Role,
 		Password: string(hashedPassword),
 	}
 	createdUser, err := a.userRepository.Save(ctx, &user)

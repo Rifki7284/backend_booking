@@ -34,6 +34,8 @@ func main() {
 	roomService := service.NewRoomService(roomRepository)
 	propertiesRepository := repository.NewProperties(db)
 	propertiesService := service.NewPropertiesService(propertiesRepository)
+	reviewRepository := repository.NewReview(db)
+	reviewService := service.NewReviewService(reviewRepository)
 	app := fiber.New()
 	_ = bookingService
 
@@ -41,6 +43,7 @@ func main() {
 	api.NewAuthApi(app, userService)
 	api.NewRoomApi(app, roomService, jwtMidd)
 	api.NewPropertiesApi(app, propertiesService, jwtMidd)
+	api.NewReviewApi(app, reviewService, jwtMidd)
 	err := app.Listen(cnf.Server.Host + ":" + cnf.Server.Port)
 	if err != nil {
 		panic(err)
