@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"shellrean.id/back-end/domain"
@@ -40,10 +39,12 @@ func (b *bookingService) Index(ctx context.Context) ([]dto.BookingData, error) {
 	return bookingData, nil
 }
 func (b *bookingService) Create(ctx context.Context, req dto.CreateBookingRequest) error {
-	checkIn, _ := time.Parse("2006-01-02", req.CheckInDate)
-	checkOut, _ := time.Parse("2006-01-02", req.CheckOutDate)
+	nights := int(req.CheckOutDate.Sub(req.CheckInDate).Hours() / 24)
 
-	nights := int(checkOut.Sub(checkIn).Hours() / 24)
+	if nights <= 0 {
+		return errors.New("check_out_date must be after check_in_date")
+	}
+
 	booking := domain.Booking{
 		ID:           uuid.NewString(),
 		UserID:       req.UserID,
@@ -51,14 +52,15 @@ func (b *bookingService) Create(ctx context.Context, req dto.CreateBookingReques
 		CheckInDate:  req.CheckInDate,
 		CheckOutDate: req.CheckOutDate,
 		Nights:       nights,
-		Status:       "Pending",
+		Status:       "scheduled",
 		Notes:        req.Notes,
 	}
+
 	return b.bookingRepository.Create(ctx, &booking)
 }
 
-func (b *bookingService) Update(ctx context.Context, req dto.UpdateBookingRequest) error {
-	persisted, err := b.bookingRepository.FindById(ctx, req.ID)
+func (b *bookingService) Update(ctx context.Context, req dto.UpdateBookingRequest, id string) error {
+	persisted, err := b.bookingRepository.FindByUser(ctx, req.ID, id)
 	if err != nil {
 		return err
 	}
@@ -69,16 +71,7 @@ func (b *bookingService) Update(ctx context.Context, req dto.UpdateBookingReques
 	persisted.Status = req.Status
 	return b.bookingRepository.Update(ctx, &persisted)
 }
-func (b *bookingService) Delete(ctx context.Context, id string) error {
-	exist, err := b.bookingRepository.FindById(ctx, id)
-	if err != nil {
-		return err
-	}
-	if exist.ID == "" {
-		return errors.New("Data booking tidak ditemukan")
-	}
-	return b.bookingRepository.Delete(ctx, id)
-}
+
 func (b *bookingService) Show(ctx context.Context, id string) (dto.BookingData, error) {
 	persisted, err := b.bookingRepository.FindById(ctx, id)
 	if err != nil {

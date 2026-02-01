@@ -63,6 +63,7 @@ func (b *bookingRepository) Update(
 		Updates(c).
 		Error
 }
+
 func (b *bookingRepository) FindById(
 	ctx context.Context,
 	id string,
@@ -73,6 +74,22 @@ func (b *bookingRepository) FindById(
 	err := b.db.
 		WithContext(ctx).
 		Where("id = ? AND deleted_at IS NULL", id).
+		First(&booking).
+		Error
+
+	return booking, err
+}
+func (b *bookingRepository) FindByUser(
+	ctx context.Context,
+	id string,
+	id_user string,
+) (domain.Booking, error) {
+
+	var booking domain.Booking
+
+	err := b.db.
+		WithContext(ctx).
+		Where("id = ? AND user_id = ? AND deleted_at IS NULL", id, id_user).
 		First(&booking).
 		Error
 

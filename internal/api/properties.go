@@ -56,9 +56,10 @@ func (pa propertiesApi) IndexByOwner(ctx *fiber.Ctx) error {
 func (pa propertiesApi) Create(ctx *fiber.Ctx) error {
 	b, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
 	claim := ctx.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
+	id := claim["id"].(string)
 	defer cancel()
 	var req dto.CreatePropertiesRequest
-	req.OwnerID = claim["id"].(string)
+	req.OwnerID = id
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.SendStatus(http.StatusUnprocessableEntity)
 	}
